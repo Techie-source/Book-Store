@@ -1,0 +1,25 @@
+		node {
+    // Define the agent (node) where the pipeline will run
+    stage('Checkout') {
+        // Stage for checking out source code from version control
+        checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: '0c6d6db3-fa3a-4b38-8134-410c2a34a8d4', url: 'https://github.com/Techie-source/WebApp.git']])
+    }
+
+    stage('Build') {
+        // Stage for building the project
+        echo 'Building the project...'
+        bat 'mvn clean install'
+    }
+
+    stage('Deploy to Tomcat') {
+        // Stage for deploying the application
+        echo 'Deploying the application...'
+        bat '''echo Stopping the Tomcat service
+            sc stop Tomcat11
+            ping 127.0.0.1 -n 6 > null
+            echo Copy war file from workspace to Tomcat
+            copy target\\MyWebApp.war "C:\\Program Files\\Apache Software Foundation\\Tomcat 11.0\\webapps"
+            echo Starting the Tomcat service
+            sc start Tomcat11'''
+    }
+}
